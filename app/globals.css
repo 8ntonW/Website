@@ -31,8 +31,21 @@
   box-sizing: border-box;
 }
 
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 html {
-  scroll-behavior: smooth;
+  scroll-snap-type: none;
 }
 
 body {
@@ -41,6 +54,7 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-snap-type: none;
 }
 
 ::selection {
@@ -56,4 +70,50 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--ash);
+}
+
+.card-hover {
+  transition: transform 0.4s ease;
+}
+
+.card-hover:hover {
+  transform: scale(1.03);
+}
+
+.scroll-track {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll-track::-webkit-scrollbar {
+  display: none;
+}
+
+body.overlay-open {
+  overflow: hidden;
+}
+
+@keyframes blob1 {
+  0%        { transform: translate(0, 0) scale(1) rotate(-10deg);      opacity: 0.5; }
+  25%       { transform: translate(260px, -200px) scale(1.48) rotate(28deg);  opacity: 0.9; }
+  60%       { transform: translate(-220px, 130px) scale(0.62) rotate(-26deg); opacity: 0.3; }
+  100%      { transform: translate(0, 0) scale(1) rotate(-10deg);      opacity: 0.5; }
+}
+
+@keyframes blob2 {
+  0%        { transform: translate(0, 0) scale(1) rotate(18deg);        opacity: 0.6; }
+  35%       { transform: translate(-290px, 220px) scale(0.6) rotate(-30deg);  opacity: 0.3; }
+  70%       { transform: translate(240px, -160px) scale(1.5) rotate(30deg);   opacity: 0.9; }
+  100%      { transform: translate(0, 0) scale(1) rotate(18deg);        opacity: 0.6; }
+}
+
+@keyframes blob3 {
+  0%        { transform: translate(0, 0) scale(1) rotate(0deg);          opacity: 0.45; }
+  40%       { transform: translate(200px, 280px) scale(1.45) rotate(-28deg);  opacity: 0.88; }
+  75%       { transform: translate(-270px, -110px) scale(0.65) rotate(22deg); opacity: 0.32; }
+  100%      { transform: translate(0, 0) scale(1) rotate(0deg);          opacity: 0.45; }
+}
+
+body.overlay-open header {
+  display: none;
 }

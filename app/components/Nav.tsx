@@ -3,9 +3,9 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const links = [
-  { label: "Hero", href: "#hero" },
+  { label: "Home", href: "#hero" },
   { label: "Projects", href: "#projects" },
-  { label: "About", href: "#about" },
+  { label: "About", href: "https://www.instagram.com/antonwdmn.studio/", external: true },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -30,7 +30,7 @@ export default function Nav() {
         transition={{ duration: 0.2 }}
         style={{ backdropFilter: "none" }}
       >
-        AW
+        antonwdmn.studio
       </motion.a>
 
       <nav className="flex items-center gap-8">
@@ -38,6 +38,7 @@ export default function Nav() {
           <motion.a
             key={link.href}
             href={link.href}
+            {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             className="text-xs tracking-widest uppercase text-mute relative group font-mono"
             whileHover={{ color: "#201d1d" }}
             transition={{ duration: 0.2 }}

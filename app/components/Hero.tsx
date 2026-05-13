@@ -1,29 +1,13 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
-const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
-
-const wordVariants = {
-  hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      delay: i * 0.08,
-      duration: 0.9,
-      ease,
-    },
-  }),
-};
-
-const headline = "antonwdmn.studio";
-const words = headline.split(" ");
+const ease = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -31,6 +15,34 @@ export default function Hero() {
 
   const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  // Scroll-driven opacity: blob fades from 1 to 0 as hero scrolls out.
+  // Direct DOM write via rAF — no React re-renders, true 60fps.
+  const blobContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const hero = ref.current;
+    const container = blobContainerRef.current;
+    if (!hero || !container) return;
+
+    let rafId: number;
+
+    const update = () => {
+      const alpha = Math.max(0, 1 - window.scrollY / hero.clientHeight);
+      container.style.opacity = String(alpha);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   return (
     <section
@@ -48,14 +60,55 @@ export default function Hero() {
         }}
       />
 
-      {/* Subtle radial gradient */}
+      {/* Blob container — opacity driven directly via rAF scroll listener (no React re-renders).
+          Inner divs run CSS keyframe animations independently; no transform conflict. */}
       <div
+        ref={blobContainerRef}
         className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(32,29,29,0.04) 0%, transparent 70%)",
-        }}
-      />
+      >
+        <div
+          className="absolute"
+          style={{ width: "75%", height: "75%", top: "5%", left: "-15%" }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "radial-gradient(ellipse at center, rgba(212,115,55,0.58) 0%, transparent 68%)",
+              filter: "blur(55px)",
+              animation: "blob1 7s ease-in-out infinite",
+            }}
+          />
+        </div>
+        <div
+          className="absolute"
+          style={{ width: "60%", height: "65%", top: "-15%", right: "-5%" }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "radial-gradient(ellipse at center, rgba(230,148,72,0.52) 0%, transparent 65%)",
+              filter: "blur(65px)",
+              animation: "blob2 8s ease-in-out infinite",
+            }}
+          />
+        </div>
+        <div
+          className="absolute"
+          style={{ width: "50%", height: "55%", bottom: "0%", left: "30%" }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "radial-gradient(ellipse at center, rgba(195,90,38,0.52) 0%, transparent 70%)",
+              filter: "blur(70px)",
+              animation: "blob3 6s ease-in-out infinite",
+            }}
+          />
+        </div>
+      </div>
 
       <motion.div
         style={{ y, opacity }}
@@ -64,45 +117,46 @@ export default function Hero() {
         {/* Eyebrow */}
         <motion.p
           className="text-xs tracking-[0.3em] uppercase text-ash mb-10 font-mono"
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease }}
+          transition={{ duration: 0.9, delay: 0.1, ease }}
         >
           Portfolio · 2026
         </motion.p>
 
-        {/* Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-ink mb-8">
-          {words.map((word, i) => (
-            <motion.span
-              key={i}
-              custom={i}
-              variants={wordVariants}
-              initial="hidden"
-              animate="visible"
-              className="inline-block mr-[0.3em] last:mr-0"
-            >
-              {word}
-            </motion.span>
-          ))}
-        </h1>
-
-        {/* Subline */}
-        <motion.p
-          className="text-lg sm:text-xl text-mute max-w-lg leading-relaxed mb-14"
-          initial={{ opacity: 0, y: 20 }}
+        <motion.h1
+          className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-ink mb-8"
+          style={{ whiteSpace: "nowrap" }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.9, ease }}
+          transition={{ duration: 0.9, delay: 0.2, ease }}
         >
-          I create cinematic visual stories for brands.
-        </motion.p>
+          antonwdmn.studio
+        </motion.h1>
+
+        {/* Availability badge */}
+        <motion.div
+          className="inline-flex items-center gap-2 mb-14"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.3, ease }}
+        >
+          <motion.span
+            style={{ color: "#30d158", fontSize: 10, lineHeight: 1 }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ●
+          </motion.span>
+          <span style={{ color: "#646262", fontSize: 13 }}>Available for projects</span>
+        </motion.div>
 
         {/* CTAs */}
         <motion.div
           className="flex items-center gap-4"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.9, ease }}
+          transition={{ delay: 0.4, duration: 0.9, ease }}
         >
           {/* Primary — View Work */}
           <motion.a
@@ -161,17 +215,18 @@ export default function Hero() {
 
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.4, duration: 1 }}
+        transition={{ delay: 0.5, duration: 0.9 }}
       >
-        <motion.div
-          className="w-px h-12 origin-top"
-          style={{ background: "var(--ash)" }}
-          animate={{ scaleY: [0, 1, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <motion.span
+          style={{ color: "var(--ash)", fontSize: 20, lineHeight: 1 }}
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          ↓
+        </motion.span>
       </motion.div>
     </section>
   );

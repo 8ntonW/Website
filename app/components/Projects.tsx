@@ -16,6 +16,7 @@ interface Project {
   label: string;
   description: string;
   process: string;
+  soundDesign?: string;
 }
 
 const projects: Project[] = [
@@ -31,6 +32,7 @@ const projects: Project[] = [
       "A self-initiated spec ad created for Google's NotebookLM. Not a client project — made purely to push my craft and explore how AI tools can be brought to life through motion. Every frame designed and animated by me.",
     process:
       "Started with a moodboard of AI-native aesthetics — data flows, emergence, clarity. Built entirely in After Effects with Cinema 4D for the 3D elements. No templates, no plugins — just craft.",
+    soundDesign: "Zoltan Monori",
   },
   {
     id: "v0-vercel",
@@ -83,20 +85,24 @@ function ProjectCard({
   project,
   index,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   project: Project;
   index: number;
   onClick: () => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 }) {
   const thumbnail = useThumbnail(project.vimeoUrl);
   const num = String(index + 1).padStart(2, "0");
 
   return (
-    <motion.article
-      className="group cursor-pointer"
+    <article
+      className="group cursor-pointer card-hover"
       onClick={onClick}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.35, ease }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {/* Thumbnail */}
       <div
@@ -165,7 +171,7 @@ function ProjectCard({
           →
         </span>
       </div>
-    </motion.article>
+    </article>
   );
 }
 
@@ -177,8 +183,8 @@ function ProjectDetail({
   onBack: () => void;
 }) {
   const embedSrc = project.videoHash
-    ? `https://player.vimeo.com/video/${project.videoId}?h=${project.videoHash}&autoplay=1&color=201d1d&byline=0&portrait=0&title=0&dnt=1`
-    : `https://player.vimeo.com/video/${project.videoId}?autoplay=1&color=201d1d&byline=0&portrait=0&title=0&dnt=1`;
+    ? `https://player.vimeo.com/video/${project.videoId}?h=${project.videoHash}&title=0&byline=0&portrait=0&badge=0`
+    : `https://player.vimeo.com/video/${project.videoId}?title=0&byline=0&portrait=0&badge=0`;
 
   const containerVariants = {
     hidden: {},
@@ -229,14 +235,34 @@ function ProjectDetail({
         {project.title}
       </motion.h2>
 
-      {/* Subtitle */}
-      <motion.p
+      {/* Subtitle row — credit shares the same vertical baseline when present */}
+      <motion.div
         variants={rowVariants}
-        className="text-xs tracking-widest uppercase mb-8 font-mono"
-        style={{ color: "var(--ash)" }}
+        className="flex items-start justify-between mb-8"
       >
-        {project.subtitle}
-      </motion.p>
+        <p
+          className="text-xs tracking-widest uppercase font-mono"
+          style={{ color: "var(--ash)" }}
+        >
+          {project.subtitle}
+        </p>
+        {project.soundDesign && (
+          <div className="text-left">
+            <p
+              className="text-xs tracking-widest uppercase font-mono"
+              style={{ color: "var(--ash)", opacity: 0.55 }}
+            >
+              Sound Design by
+            </p>
+            <p
+              className="text-xs font-mono"
+              style={{ color: "var(--ash)", opacity: 0.55 }}
+            >
+              {project.soundDesign}
+            </p>
+          </div>
+        )}
+      </motion.div>
 
       {/* Description */}
       <motion.p
@@ -269,59 +295,65 @@ function ProjectDetail({
         />
       </motion.div>
 
-      {/* Process section */}
-      <motion.div
-        variants={rowVariants}
-        className="pt-12"
-        style={{ borderTop: "1px solid var(--hairline)" }}
-      >
-        <p
-          className="text-xs tracking-[0.3em] uppercase mb-6 font-mono"
-          style={{ color: "var(--ash)" }}
-        >
-          process_
-        </p>
-        <p
-          className="text-base leading-8 max-w-2xl"
-          style={{ color: "var(--mute)" }}
-        >
-          {project.process}
-        </p>
-      </motion.div>
     </motion.div>
   );
 }
 
-const gridContainerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
+const sectionItemVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] as const, delay: i * 0.1 },
+  }),
 };
 
-const gridItemVariants = {
-  hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
+const cardContainerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
 export default function Projects() {
   const [selected, setSelected] = useState<Project | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(headerRef, { once: true, margin: "-10%" });
+  const gridRef = useRef<HTMLDivElement>(null);
+  const gridInView = useInView(gridRef, { amount: 0.1 });
+  const cursorRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (project: Project) => {
-    setSelected(project);
-    setTimeout(
-      () => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      50
-    );
+  useEffect(() => {
+    document.body.classList.toggle("overlay-open", !!selected);
+    return () => document.body.classList.remove("overlay-open");
+  }, [selected]);
+
+  useEffect(() => {
+    const cursor = cursorRef.current;
+    if (!cursor) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      cursor.style.left = `${e.clientX + 15}px`;
+      cursor.style.top = `${e.clientY + 15}px`;
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
+
+  const showCursor = () => {
+    if (cursorRef.current) {
+      cursorRef.current.style.opacity = "1";
+      cursorRef.current.style.transform = "scale(1)";
+    }
   };
-
-  const handleBack = () => {
-    setSelected(null);
-    setTimeout(
-      () => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      50
-    );
+  const hideCursor = () => {
+    if (cursorRef.current) {
+      cursorRef.current.style.opacity = "0";
+      cursorRef.current.style.transform = "scale(0.8)";
+    }
   };
 
   return (
@@ -331,81 +363,105 @@ export default function Projects() {
       className="min-h-screen flex flex-col items-center justify-center px-6 scroll-mt-0"
       style={{ background: "var(--canvas)", borderTop: "1px solid var(--hairline)" }}
     >
-      <div className="max-w-6xl mx-auto w-full">
-        <AnimatePresence mode="wait">
-          {!selected ? (
-            <motion.div
-              key="grid"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.4, ease }}
+      {/* Projects grid — always visible behind overlay */}
+      <div ref={gridRef} className="max-w-6xl mx-auto w-full">
+        <div className="mb-20">
+          <motion.p
+            custom={0}
+            variants={sectionItemVariants}
+            initial="hidden"
+            animate={gridInView ? "visible" : "hidden"}
+            className="text-xs tracking-[0.3em] uppercase mb-4 font-mono"
+            style={{ color: "var(--ash)" }}
+          >
+            Work
+          </motion.p>
+          <div className="flex items-end justify-between gap-8 flex-wrap">
+            <motion.h2
+              custom={1}
+              variants={sectionItemVariants}
+              initial="hidden"
+              animate={gridInView ? "visible" : "hidden"}
+              className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.0]"
+              style={{ color: "var(--ink)" }}
             >
-              {/* Section header */}
-              <motion.div
-                ref={headerRef}
-                variants={gridContainerVariants}
-                initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
-                className="mb-20"
-              >
-                <motion.p
-                  variants={gridItemVariants}
-                  className="text-xs tracking-[0.3em] uppercase mb-4 font-mono"
-                  style={{ color: "var(--ash)" }}
-                >
-                  Work
-                </motion.p>
-                <motion.div
-                  variants={gridItemVariants}
-                  className="flex items-end justify-between gap-8 flex-wrap"
-                >
-                  <h2
-                    className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.0]"
-                    style={{ color: "var(--ink)" }}
-                  >
-                    projects
-                  </h2>
-                  <p
-                    className="text-sm pb-1 font-mono"
-                    style={{ color: "var(--ash)" }}
-                  >
-                    selected work — 2025 & 2026
-                  </p>
-                </motion.div>
-              </motion.div>
+              projects
+            </motion.h2>
+            <motion.p
+              custom={2}
+              variants={sectionItemVariants}
+              initial="hidden"
+              animate={gridInView ? "visible" : "hidden"}
+              className="text-sm pb-1 font-mono"
+              style={{ color: "var(--ash)" }}
+            >
+              selected work — 2025 & 2026
+            </motion.p>
+          </div>
+        </div>
 
-              {/* Cards grid */}
-              <motion.div
-                variants={gridContainerVariants}
-                initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
-                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-14"
-              >
-                {projects.map((project, i) => (
-                  <motion.div key={project.id} variants={gridItemVariants}>
-                    <ProjectCard
-                      project={project}
-                      index={i}
-                      onClick={() => handleSelect(project)}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
+        <motion.div
+          variants={cardContainerVariants}
+          initial="hidden"
+          animate={gridInView ? "visible" : "hidden"}
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-14"
+        >
+          {projects.map((project, i) => (
+            <motion.div key={project.id} variants={cardVariants}>
+              <ProjectCard
+                project={project}
+                index={i}
+                onClick={() => setSelected(project)}
+                onMouseEnter={showCursor}
+                onMouseLeave={hideCursor}
+              />
             </motion.div>
-          ) : (
-            <motion.div
-              key={selected.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.45, ease }}
-            >
-              <ProjectDetail project={selected} onBack={handleBack} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+          ))}
+        </motion.div>
       </div>
+
+      {/* Custom PLAY cursor */}
+      <div
+        ref={cursorRef}
+        className="fixed z-[500] pointer-events-none flex items-center justify-center"
+        style={{
+          top: -200,
+          left: -200,
+          width: 80,
+          height: 30,
+          background: "#201d1d",
+          borderRadius: 9999,
+          opacity: 0,
+          transform: "scale(0.8)",
+          transition: "opacity 0.4s ease, transform 0.4s ease",
+        }}
+      >
+        <span
+          className="font-mono select-none"
+          style={{ color: "#fdfcfc", fontSize: 11, letterSpacing: 2 }}
+        >
+          ▶ PLAY
+        </span>
+      </div>
+
+      {/* Full-screen detail overlay */}
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            key={selected.id}
+            initial={{ x: "100%", opacity: 0.5 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0.5 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[100] overflow-y-auto"
+            style={{ background: "#fdfcfc" }}
+          >
+            <div className="max-w-6xl mx-auto px-6 py-16">
+              <ProjectDetail project={selected} onBack={() => setSelected(null)} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
