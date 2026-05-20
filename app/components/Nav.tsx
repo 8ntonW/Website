@@ -30,7 +30,7 @@ export default function Nav() {
         transition={{ duration: 0.2 }}
         style={{ backdropFilter: "none" }}
       >
-        antonwdmn.studio
+        .studio
       </motion.a>
 
       <nav className="flex items-center gap-8">

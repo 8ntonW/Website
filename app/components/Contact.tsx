@@ -438,7 +438,7 @@ export default function Contact() {
             </a>
           </div>
           <p className="text-xs" style={{ color: "#9a9898" }}>
-            Munich, Germany
+            Dresden, Germany
           </p>
         </motion.div>
         </>)}

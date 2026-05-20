@@ -19,7 +19,6 @@ export default function Hero() {
   // Scroll-driven opacity: blob fades from 1 to 0 as hero scrolls out.
   // Direct DOM write via rAF — no React re-renders, true 60fps.
   const blobContainerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const hero = ref.current;
     const container = blobContainerRef.current;
