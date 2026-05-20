@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence, type Variants } from "framer-motion";
 import { useRef, useState } from "react";
 
 const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
@@ -28,7 +28,7 @@ const containerVariants = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1,
