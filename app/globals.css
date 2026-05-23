@@ -76,8 +76,10 @@ body {
   transition: transform 0.4s ease;
 }
 
-.card-hover:hover {
-  transform: scale(1.03);
+@media (hover: hover) {
+  .card-hover:hover {
+    transform: scale(1.03);
+  }
 }
 
 .scroll-track {

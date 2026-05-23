@@ -238,7 +238,7 @@ function ProjectDetail({
       {/* Subtitle row — credit shares the same vertical baseline when present */}
       <motion.div
         variants={rowVariants}
-        className="flex items-start justify-between mb-8"
+        className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 sm:gap-0 mb-8"
       >
         <p
           className="text-xs tracking-widest uppercase font-mono"
@@ -360,12 +360,12 @@ export default function Projects() {
     <section
       id="projects"
       ref={sectionRef}
-      className="min-h-screen flex flex-col items-center justify-center px-6 scroll-mt-0"
+      className="min-h-screen flex flex-col items-center justify-center px-6 py-24 sm:py-20 scroll-mt-0"
       style={{ background: "var(--canvas)", borderTop: "1px solid var(--hairline)" }}
     >
       {/* Projects grid — always visible behind overlay */}
       <div ref={gridRef} className="max-w-6xl mx-auto w-full">
-        <div className="mb-20">
+        <div className="mb-12 sm:mb-20">
           <motion.p
             custom={0}
             variants={sectionItemVariants}
@@ -376,7 +376,7 @@ export default function Projects() {
           >
             Work
           </motion.p>
-          <div className="flex items-end justify-between gap-8 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-2 sm:gap-8">
             <motion.h2
               custom={1}
               variants={sectionItemVariants}
@@ -392,7 +392,7 @@ export default function Projects() {
               variants={sectionItemVariants}
               initial="hidden"
               animate={gridInView ? "visible" : "hidden"}
-              className="text-sm pb-1 font-mono"
+              className="text-sm sm:pb-1 font-mono"
               style={{ color: "var(--ash)" }}
             >
               selected work — 2025 & 2026
@@ -456,7 +456,7 @@ export default function Projects() {
             className="fixed inset-0 z-[100] overflow-y-auto"
             style={{ background: "#fdfcfc" }}
           >
-            <div className="max-w-6xl mx-auto px-6 py-16">
+            <div className="max-w-6xl mx-auto px-6 py-20 sm:py-16">
               <ProjectDetail project={selected} onBack={() => setSelected(null)} />
             </div>
           </motion.div>

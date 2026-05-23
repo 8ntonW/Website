@@ -124,8 +124,7 @@ export default function Hero() {
         </motion.p>
 
         <motion.h1
-          className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-ink mb-8"
-          style={{ whiteSpace: "nowrap" }}
+          className="text-[clamp(1.75rem,8vw,4.5rem)] sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-ink mb-8"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.2, ease }}
@@ -135,7 +134,7 @@ export default function Hero() {
 
         {/* Availability badge */}
         <motion.div
-          className="inline-flex items-center gap-2 mb-14"
+          className="inline-flex items-center gap-2 mb-8 sm:mb-14"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.3, ease }}
@@ -152,7 +151,7 @@ export default function Hero() {
 
         {/* CTAs */}
         <motion.div
-          className="flex items-center gap-4"
+          className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.9, ease }}
@@ -160,7 +159,7 @@ export default function Hero() {
           {/* Primary — View Work */}
           <motion.a
             href="#projects"
-            className="group relative inline-flex items-center justify-between w-48 px-7 py-4 text-xs tracking-widest uppercase font-medium overflow-hidden rounded-full font-mono"
+            className="group relative inline-flex items-center justify-between w-full sm:w-48 px-7 py-4 text-xs tracking-widest uppercase font-medium overflow-hidden rounded-full font-mono"
             style={{ background: "#201d1d", color: "#fdfcfc" }}
             whileHover="hover"
           >
@@ -184,7 +183,7 @@ export default function Hero() {
           {/* Secondary — Contact */}
           <motion.a
             href="#contact"
-            className="group relative inline-flex items-center justify-between w-48 px-7 py-4 text-xs tracking-widest uppercase font-medium overflow-hidden rounded-full font-mono"
+            className="group relative inline-flex items-center justify-between w-full sm:w-48 px-7 py-4 text-xs tracking-widest uppercase font-medium overflow-hidden rounded-full font-mono"
             style={{ background: "#201d1d", color: "#fdfcfc" }}
             whileHover="hover"
           >

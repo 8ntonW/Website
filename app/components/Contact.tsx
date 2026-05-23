@@ -170,7 +170,7 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="min-h-screen flex flex-col items-center justify-center px-6 pt-[120px]"
+      className="min-h-screen flex flex-col items-center justify-center px-6 pt-24 sm:pt-[120px]"
       style={{ background: "#201d1d" }}
     >
       <div ref={sectionRef} className="max-w-3xl mx-auto w-full">
