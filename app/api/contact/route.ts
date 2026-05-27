@@ -2,8 +2,23 @@ import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  const body = await req.json();
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error("[contact] RESEND_API_KEY is not set");
+    return NextResponse.json(
+      { error: "Server configuration error: missing API key." },
+      { status: 500 }
+    );
+  }
+
+  const resend = new Resend(apiKey);
+
+  let body: Record<string, string>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
 
   const {
     name,
@@ -17,6 +32,10 @@ export async function POST(req: NextRequest) {
     notes,
     email,
   } = body;
+
+  if (!email) {
+    return NextResponse.json({ error: "Email address is required." }, { status: 400 });
+  }
 
   const row = (label: string, value: string) =>
     value ? `<tr><td style="padding:8px 0;color:#9a9898;font-size:13px;width:180px;vertical-align:top">${label}</td><td style="padding:8px 0;color:#fdfcfc;font-size:13px">${value}</td></tr>` : "";
@@ -44,8 +63,8 @@ export async function POST(req: NextRequest) {
     </div>
   `;
 
-  const { error } = await resend.emails.send({
-    from: "antonwdmn.studio <onboarding@resend.dev>",
+  const { data, error } = await resend.emails.send({
+    from: "antonwdmn.studio <contact@antonwdmn.studio>",
     to: "kontakt@antonediting.com",
     replyTo: email,
     subject: "New project inquiry — antonwdmn.studio",
@@ -53,8 +72,13 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[contact] Resend error:", error);
+    return NextResponse.json(
+      { error: `Failed to send email: ${error.message}` },
+      { status: 500 }
+    );
   }
 
+  console.log("[contact] Email sent, id:", data?.id);
   return NextResponse.json({ ok: true });
 }
